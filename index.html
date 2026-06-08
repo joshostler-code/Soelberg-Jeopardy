@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<!--
+  =====================================================================
+  SOELBERG JEOPARDY
+  =====================================================================
+  HOW TO CUSTOMIZE YOUR QUESTIONS:
+  1. Scroll down to the "GAME DATA — EDIT YOUR QUESTIONS HERE!" section
+  2. Change the category names (e.g. "Category 1" → "Family History")
+  3. Replace each question and answer with your own
+  4. Save the file and refresh the page!
+
+  HOW TO HOST ON GITHUB PAGES (step-by-step at the bottom of this file)
+  =====================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soelberg Jeopardy</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Arial Black', Arial, sans-serif;
+      background: #0B2265;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 32px 32px;
+      color: white;
+      min-height: 100vh;
+    }
+
+    /* ---- Setup Screen ---- */
+    #setup-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .stars-bar {
+      font-size: 1.4em;
+      letter-spacing: 6px;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 8px;
+    }
+
+    .main-title {
+      font-size: 3em;
+      color: #ffffff;
+      text-shadow: 3px 3px 0 #BF0A30, 6px 6px 0 #7a0520;
+      margin-bottom: 6px;
+      text-align: center;
+      line-height: 1.15;
+    }
+
+    .subtitle {
+      font-size: 1.1em;
+      color: #ffcccc;
+      margin-bottom: 28px;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+
+    .setup-card {
+      background: rgba(0,0,0,0.4);
+      border: 3px solid #BF0A30;
+      border-radius: 14px;
+      padding: 32px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 0 30px rgba(191,10,48,0.3);
+    }
+
+    .setup-card h2 {
+      color: #ffffff;
+      text-align: center;
+      margin-bottom: 18px;
+      font-size: 1.1em;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .num-teams-row {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 22px;
+    }
+
+    .num-btn {
+      padding: 9px 22px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 20px;
+      background: transparent;
+      color: white;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.95em;
+      transition: all 0.2s;
+    }
+
+    .num-btn.active {
+      background: #BF0A30;
+      color: #fff;
+      border-color: #BF0A30;
+      font-weight: bold;
+    }
+
+    .num-btn:hover:not(.active) {
+      border-color: #BF0A30;
+      color: #ff8fa0;
+    }
+
+    .team-inputs { display: grid; gap: 10px; margin-bottom: 22px; }
+
+    .team-input-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .team-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,0.4);
+    }
+
+    .team-input-row input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 2px solid rgba(255,255,255,0.25);
+      border-radius: 8px;
+      background: rgba(0,0,0,0.4);
+      color: white;
+      font-size: 1em;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    .team-input-row input:focus {
+      outline: none;
+      border-color: #BF0A30;
+    }
+
+    .team-input-row input::placeholder { color: rgba(255,255,255,0.35); }
+
+    .start-btn {
+      width: 100%;
+      padding: 14px;
+      background: #BF0A30;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.2em;
+      font-family: 'Arial Black', Arial, sans-serif;
+      cursor: pointer;
+      transition: transform 0.1s, background 0.2s;
+      letter-spacing: 1px;
+    }
+
+    .start-btn:hover { background: #d4122a; transform: scale(1.02); }
+
+    /* ---- Game Screen ---- */
+    #game-screen {
+      display: none;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .game-header {
+      text-align: center;
+      padding: 12px 10px 4px;
+      border-bottom: 3px solid rgba(191,10,48,0.4);
+    }
+
+    .game-title {
+      font-size: 2em;
+      color: #ffffff;
+      text-shadow: 2px 2px 0 #BF0A30;
+      letter-spacing: 1px;
+    }
+
+    .scoreboard {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 10px;
+      flex-wrap: wrap;
+    }
+
+    .score-card {
+      background: rgba(0,0,0,0.5);
+      border: 3px solid;
+      border-radius: 10px;
+      padding: 8px 18px;
+      text-align: center;
+      min-width: 120px;
+    }
+
+    .score-name {
+      font-size: 0.75em;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 2px;
+    }
+
+    .score-value {
+      font-size: 1.9em;
+      font-weight: bold;
+      color: #ffffff;
+    }
+
+    .board-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 10px;
+    }
+
+    .board {
+      display: grid;
+      gap: 5px;
+      width: 100%;
+      max-width: 960px;
+    }
+
+    .cat-header {
+      background: #BF0A30;
+      border: 3px solid #8B0020;
+      padding: 10px 6px;
+      text-align: center;
+      font-size: 0.78em;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-radius: 4px;
+      min-height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.3;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+    }
+
+    .cell {
+      background: #0B2265;
+      border: 3px solid #1a3a8a;
+      text-align: center;
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #ffffff;
+      text-shadow: 2px 2px 0 #BF0A30;
+      cursor: pointer;
+      border-radius: 4px;
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, transform 0.1s;
+      user-select: none;
+    }
+
+    .cell:hover:not(.used) {
+      background: #1a3a8a;
+      transform: scale(1.03);
+      box-shadow: 0 0 12px rgba(191,10,48,0.4);
+    }
+
+    .cell.used {
+      background: #060f3a;
+      color: transparent;
+      cursor: default;
+      border-color: #040a28;
+      pointer-events: none;
+    }
+
+    .game-controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 10px;
+      border-top: 3px solid rgba(191,10,48,0.4);
+    }
+
+    .ctrl-btn {
+      padding: 8px 20px;
+      background: rgba(0,0,0,0.4);
+      border: 2px solid rgba(255,255,255,0.3);
+      color: white;
+      border-radius: 6px;
+      font-family: inherit;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: all 0.2s;
+    }
+
+    .ctrl-btn:hover { border-color: #BF0A30; color: #ff8fa0; }
+
+    /* ---- Modal ---- */
+    #modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,10,0.9);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal {
+      background: #0B2265;
+      border: 5px solid #BF0A30;
+      border-radius: 18px;
+      padding: 36px 40px;
+      max-width: 680px;
+      width: 100%;
+      text-align: center;
+      position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 0 40px rgba(191,10,48,0.4);
+    }
+
+    .modal-cat {
+      font-size: 0.85em;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #ffcccc;
+      margin-bottom: 6px;
+    }
+
+    .modal-pts {
+      font-size: 1.6em;
+      color: #ffffff;
+      text-shadow: 2px 2px 0 #BF0A30;
+      margin-bottom: 22px;
+    }
+
+    .modal-q {
+      font-size: 1.45em;
+      line-height: 1.45;
+      margin-bottom: 28px;
+      min-height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-ans {
+      background: rgba(0,0,0,0.45);
+      border: 2px solid #BF0A30;
+      border-radius: 10px;
+      padding: 14px 20px;
+      margin-bottom: 22px;
+      display: none;
+    }
+
+    .modal-ans.show { display: block; }
+
+    .modal-ans-label {
+      font-size: 0.7em;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #ffcccc;
+      margin-bottom: 6px;
+    }
+
+    .modal-ans-text {
+      font-size: 1.2em;
+      color: #aee8ff;
+    }
+
+    .reveal-btn {
+      padding: 12px 32px;
+      background: #BF0A30;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      font-family: 'Arial Black', Arial, sans-serif;
+      cursor: pointer;
+      margin-bottom: 16px;
+      transition: transform 0.1s, background 0.2s;
+      letter-spacing: 1px;
+    }
+
+    .reveal-btn:hover { background: #d4122a; transform: scale(1.04); }
+
+    .award-section { display: none; flex-direction: column; gap: 10px; }
+    .award-section.show { display: flex; }
+
+    .award-label {
+      font-size: 0.8em;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #ffcccc;
+    }
+
+    .award-buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .award-btn {
+      padding: 11px 18px;
+      border: 3px solid;
+      border-radius: 8px;
+      background: rgba(0,0,0,0.3);
+      color: white;
+      font-family: 'Arial Black', Arial, sans-serif;
+      font-size: 0.8em;
+      cursor: pointer;
+      transition: all 0.15s;
+      min-width: 110px;
+      line-height: 1.4;
+    }
+
+    .award-btn:hover { transform: scale(1.06); filter: brightness(1.2); }
+
+    .no-win-btn {
+      padding: 9px 22px;
+      background: transparent;
+      border: 2px solid rgba(255,255,255,0.25);
+      color: rgba(255,255,255,0.55);
+      border-radius: 8px;
+      font-family: inherit;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: all 0.2s;
+    }
+
+    .no-win-btn:hover { border-color: rgba(255,255,255,0.6); color: white; }
+
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.4);
+      font-size: 1.6em;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+
+    .modal-close:hover { color: #ff8fa0; }
+
+    /* ---- Final Screen ---- */
+    #final-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .final-title {
+      font-size: 3em;
+      color: #ffffff;
+      text-shadow: 3px 3px 0 #BF0A30, 6px 6px 0 #7a0520;
+      margin-bottom: 10px;
+    }
+
+    .final-subtitle {
+      font-size: 1em;
+      color: #ffcccc;
+      margin-bottom: 28px;
+    }
+
+    .final-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      max-width: 420px;
+      margin-bottom: 28px;
+    }
+
+    .final-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0,0,0,0.45);
+      border: 3px solid;
+      border-radius: 10px;
+      padding: 14px 20px;
+      font-size: 1.15em;
+    }
+
+    .final-row.winner {
+      background: rgba(191, 10, 48, 0.2);
+      box-shadow: 0 0 16px rgba(191,10,48,0.35);
+    }
+
+    .play-again-btn {
+      padding: 14px 44px;
+      background: #BF0A30;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.2em;
+      font-family: 'Arial Black', Arial, sans-serif;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      letter-spacing: 1px;
+    }
+
+    .play-again-btn:hover { background: #d4122a; transform: scale(1.02); }
+
+    @media (max-width: 580px) {
+      .main-title { font-size: 2em; }
+      .cell { font-size: 1.1em; min-height: 56px; }
+      .game-title { font-size: 1.4em; }
+      .score-card { min-width: 90px; padding: 6px 10px; }
+      .score-value { font-size: 1.5em; }
+      .modal { padding: 24px 20px; }
+      .modal-q { font-size: 1.2em; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ================================================================
+     SETUP SCREEN
+================================================================ -->
+<div id="setup-screen">
+  <div class="stars-bar">★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★</div>
+  <h1 class="main-title">🇺🇸 Soelberg Jeopardy 🇺🇸</h1>
+  <p class="subtitle">★ The Soelberg Family Game Show ★</p>
+
+  <div class="setup-card">
+    <h2>How many teams?</h2>
+    <div class="num-teams-row">
+      <button class="num-btn" onclick="setNumTeams(2)">2 Teams</button>
+      <button class="num-btn active" onclick="setNumTeams(3)">3 Teams</button>
+      <button class="num-btn" onclick="setNumTeams(4)">4 Teams</button>
+    </div>
+
+    <h2>Team Names</h2>
+    <div class="team-inputs" id="team-inputs"></div>
+
+    <button class="start-btn" onclick="startGame()">★ Let's Play! ★</button>
+  </div>
+</div>
+
+<!-- ================================================================
+     GAME SCREEN
+================================================================ -->
+<div id="game-screen">
+  <div class="game-header">
+    <div class="game-title">🇺🇸 Soelberg Jeopardy 🇺🇸</div>
+  </div>
+
+  <div class="scoreboard" id="scoreboard"></div>
+
+  <div class="board-wrapper">
+    <div class="board" id="board"></div>
+  </div>
+
+  <div class="game-controls">
+    <button class="ctrl-btn" onclick="showFinal()">🏆 Final Scores</button>
+    <button class="ctrl-btn" onclick="goSetup()">🔄 New Game</button>
+  </div>
+</div>
+
+<!-- ================================================================
+     FINAL SCREEN
+================================================================ -->
+<div id="final-screen">
+  <div class="stars-bar">★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★</div>
+  <div class="final-title">🏆 Game Over!</div>
+  <p class="final-subtitle">Here's how everyone did:</p>
+  <div class="final-list" id="final-list"></div>
+  <button class="play-again-btn" onclick="goSetup()">★ Play Again ★</button>
+</div>
+
+<!-- ================================================================
+     QUESTION MODAL
+================================================================ -->
+<div id="modal-overlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-cat" id="modal-cat"></div>
+    <div class="modal-pts" id="modal-pts"></div>
+    <div class="modal-q" id="modal-q"></div>
+
+    <button class="reveal-btn" id="reveal-btn" onclick="revealAnswer()">★ Reveal Answer ★</button>
+
+    <div class="modal-ans" id="modal-ans">
+      <div class="modal-ans-label">Answer</div>
+      <div class="modal-ans-text" id="modal-ans-text"></div>
+    </div>
+
+    <div class="award-section" id="award-section">
+      <div class="award-label">Award points to:</div>
+      <div class="award-buttons" id="award-buttons"></div>
+      <button class="no-win-btn" onclick="noWinner()">No winner — close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================================================================
+//  🎮 GAME DATA — EDIT YOUR QUESTIONS HERE!
+// ===================================================================
+//
+//  HOW TO CUSTOMIZE:
+//  1. Change the "name" fields to your category names.
+//  2. Fill in your own "question" and "answer" strings.
+//  3. You can use any characters, including emoji!
+//  4. Keep exactly 5 categories with 5 questions each.
+//
+// ===================================================================
+
+const CATEGORIES = [
+  {
+    name: "Category 1",
+    questions: [
+      { q: "Sample question for $200.",  a: "Sample answer" },
+      { q: "Sample question for $400.",  a: "Sample answer" },
+      { q: "Sample question for $600.",  a: "Sample answer" },
+      { q: "Sample question for $800.",  a: "Sample answer" },
+      { q: "Sample question for $1000.", a: "Sample answer" },
+    ]
+  },
+  {
+    name: "Category 2",
+    questions: [
+      { q: "Sample question for $200.",  a: "Sample answer" },
+      { q: "Sample question for $400.",  a: "Sample answer" },
+      { q: "Sample question for $600.",  a: "Sample answer" },
+      { q: "Sample question for $800.",  a: "Sample answer" },
+      { q: "Sample question for $1000.", a: "Sample answer" },
+    ]
+  },
+  {
+    name: "Category 3",
+    questions: [
+      { q: "Sample question for $200.",  a: "Sample answer" },
+      { q: "Sample question for $400.",  a: "Sample answer" },
+      { q: "Sample question for $600.",  a: "Sample answer" },
+      { q: "Sample question for $800.",  a: "Sample answer" },
+      { q: "Sample question for $1000.", a: "Sample answer" },
+    ]
+  },
+  {
+    name: "Category 4",
+    questions: [
+      { q: "Sample question for $200.",  a: "Sample answer" },
+      { q: "Sample question for $400.",  a: "Sample answer" },
+      { q: "Sample question for $600.",  a: "Sample answer" },
+      { q: "Sample question for $800.",  a: "Sample answer" },
+      { q: "Sample question for $1000.", a: "Sample answer" },
+    ]
+  },
+  {
+    name: "Category 5",
+    questions: [
+      { q: "Sample question for $200.",  a: "Sample answer" },
+      { q: "Sample question for $400.",  a: "Sample answer" },
+      { q: "Sample question for $600.",  a: "Sample answer" },
+      { q: "Sample question for $800.",  a: "Sample answer" },
+      { q: "Sample question for $1000.", a: "Sample answer" },
+    ]
+  },
+];
+
+// ===================================================================
+//  CONSTANTS & STATE
+// ===================================================================
+
+const PTS    = [200, 400, 600, 800, 1000];
+const COLORS = ["#BF0A30", "#4a90d9", "#e8e8e8", "#e67e22"];
+const LABELS = ["Red Team", "Blue Team", "White Team", "Gold Team"];
+
+let numTeams  = 3;
+let teamNames = [];
+let scores    = [];
+let used      = {};   // key "col-row" → true
+let active    = null; // { col, row } of open question
+
+// ===================================================================
+//  SETUP
+// ===================================================================
+
+function setNumTeams(n) {
+  numTeams = n;
+  document.querySelectorAll('.num-btn').forEach((b, i) => {
+    b.classList.toggle('active', i === n - 2);
+  });
+  buildTeamInputs();
+}
+
+function buildTeamInputs() {
+  const c = document.getElementById('team-inputs');
+  c.innerHTML = '';
+  for (let i = 0; i < numTeams; i++) {
+    const row = document.createElement('div');
+    row.className = 'team-input-row';
+    row.innerHTML = `
+      <div class="team-dot" style="background:${COLORS[i]}"></div>
+      <input type="text" id="tn-${i}" placeholder="${LABELS[i]}" value="${teamNames[i] || ''}">
+    `;
+    c.appendChild(row);
+  }
+}
+
+function startGame() {
+  teamNames = [];
+  scores    = [];
+  used      = {};
+  for (let i = 0; i < numTeams; i++) {
+    const v = document.getElementById(`tn-${i}`).value.trim();
+    teamNames.push(v || `Team ${i + 1}`);
+    scores.push(0);
+  }
+  show('game-screen', 'flex');
+  hide('setup-screen');
+  hide('final-screen');
+  buildBoard();
+  buildScoreboard();
+}
+
+function goSetup() {
+  show('setup-screen', 'flex');
+  hide('game-screen');
+  hide('final-screen');
+  buildTeamInputs();
+}
+
+// ===================================================================
+//  BOARD
+// ===================================================================
+
+function buildBoard() {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  board.style.gridTemplateColumns = `repeat(${CATEGORIES.length}, 1fr)`;
+
+  // Row 1: category headers
+  CATEGORIES.forEach(cat => {
+    const h = document.createElement('div');
+    h.className = 'cat-header';
+    h.textContent = cat.name;
+    board.appendChild(h);
+  });
+
+  // Rows 2–6: question cells
+  PTS.forEach((pts, row) => {
+    CATEGORIES.forEach((_, col) => {
+      const key  = `${col}-${row}`;
+      const cell = document.createElement('div');
+      cell.className   = 'cell' + (used[key] ? ' used' : '');
+      cell.textContent = used[key] ? '' : `$${pts}`;
+      cell.dataset.col = col;
+      cell.dataset.row = row;
+      cell.onclick     = () => openQ(col, row);
+      board.appendChild(cell);
+    });
+  });
+}
+
+// ===================================================================
+//  SCOREBOARD
+// ===================================================================
+
+function buildScoreboard() {
+  const sb = document.getElementById('scoreboard');
+  sb.innerHTML = '';
+  teamNames.forEach((name, i) => {
+    const card = document.createElement('div');
+    card.className  = 'score-card';
+    card.style.borderColor = COLORS[i];
+    card.innerHTML  = `
+      <div class="score-name" style="color:${COLORS[i]}">${name}</div>
+      <div class="score-value" id="sv-${i}">$0</div>
+    `;
+    sb.appendChild(card);
+  });
+}
+
+function refreshScores() {
+  scores.forEach((s, i) => {
+    const el = document.getElementById(`sv-${i}`);
+    if (el) el.textContent = `$${s.toLocaleString()}`;
+  });
+}
+
+// ===================================================================
+//  MODAL
+// ===================================================================
+
+function openQ(col, row) {
+  const key = `${col}-${row}`;
+  if (used[key]) return;
+  active = { col, row };
+
+  const cat = CATEGORIES[col];
+  const q   = cat.questions[row];
+  const pts = PTS[row];
+
+  document.getElementById('modal-cat').textContent      = cat.name;
+  document.getElementById('modal-pts').textContent      = `$${pts}`;
+  document.getElementById('modal-q').textContent        = q.q;
+  document.getElementById('modal-ans-text').textContent = q.a;
+  document.getElementById('modal-ans').classList.remove('show');
+  document.getElementById('reveal-btn').style.display   = 'inline-block';
+  document.getElementById('award-section').classList.remove('show');
+
+  document.getElementById('modal-overlay').style.display = 'flex';
+}
+
+function revealAnswer() {
+  document.getElementById('modal-ans').classList.add('show');
+  document.getElementById('reveal-btn').style.display = 'none';
+
+  const pts     = PTS[active.row];
+  const btnsDiv = document.getElementById('award-buttons');
+  btnsDiv.innerHTML = '';
+
+  teamNames.forEach((name, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'award-btn';
+    btn.style.borderColor = COLORS[i];
+    btn.style.color       = COLORS[i];
+    btn.innerHTML = `✔ ${name}<br><small style="font-size:0.85em">+$${pts}</small>`;
+    btn.onclick   = () => award(i);
+    btnsDiv.appendChild(btn);
+  });
+
+  document.getElementById('award-section').classList.add('show');
+}
+
+function award(idx) {
+  scores[idx] += PTS[active.row];
+  refreshScores();
+  markUsed();
+  closeModal();
+}
+
+function noWinner() {
+  markUsed();
+  closeModal();
+}
+
+function markUsed() {
+  if (!active) return;
+  const key  = `${active.col}-${active.row}`;
+  used[key]  = true;
+  const cell = document.querySelector(`.cell[data-col="${active.col}"][data-row="${active.row}"]`);
+  if (cell) { cell.classList.add('used'); cell.textContent = ''; }
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').style.display = 'none';
+  active = null;
+}
+
+// ===================================================================
+//  FINAL SCREEN
+// ===================================================================
+
+function showFinal() {
+  const ranked = teamNames
+    .map((n, i) => ({ n, s: scores[i], c: COLORS[i] }))
+    .sort((a, b) => b.s - a.s);
+
+  const top = ranked[0].s;
+  const list = document.getElementById('final-list');
+  list.innerHTML = '';
+  ranked.forEach((t, rank) => {
+    const row = document.createElement('div');
+    row.className  = 'final-row' + (t.s === top && top > 0 ? ' winner' : '');
+    row.style.borderColor = t.c;
+    row.innerHTML  = `
+      <span>${rank === 0 && top > 0 ? '👑 ' : ''}${t.n}</span>
+      <span style="color:${t.c}; font-weight:bold">$${t.s.toLocaleString()}</span>
+    `;
+    list.appendChild(row);
+  });
+
+  hide('game-screen');
+  show('final-screen', 'flex');
+}
+
+// ===================================================================
+//  HELPERS
+// ===================================================================
+
+function show(id, d = 'block') {
+  document.getElementById(id).style.display = d;
+}
+
+function hide(id) {
+  document.getElementById(id).style.display = 'none';
+}
+
+// ===================================================================
+//  INIT
+// ===================================================================
+buildTeamInputs();
+</script>
+
+</body>
+</html>
+
+<!--
+===================================================================
+HOW TO HOST ON GITHUB PAGES (Free & Public)
+===================================================================
+
+STEP 1 — Create a new repository
+  1. Go to https://github.com and sign in.
+  2. Click the "+" icon (top-right) → "New repository".
+  3. Name it something like: soelberg-jeopardy
+  4. Set visibility to PUBLIC.
+  5. Click "Create repository".
+
+STEP 2 — Upload this file
+  Option A (easiest — browser):
+    1. On your new repo page, click "uploading an existing file".
+    2. Drag this file (index.html) into the upload area.
+    3. Click "Commit changes".
+
+  Option B (git command line):
+    git init
+    git add index.html
+    git commit -m "Add Soelberg Jeopardy"
+    git branch -M main
+    git remote add origin https://github.com/YOUR-USERNAME/soelberg-jeopardy.git
+    git push -u origin main
+
+STEP 3 — Enable GitHub Pages
+  1. In your repo, click "Settings" (top menu).
+  2. In the left sidebar, click "Pages".
+  3. Under "Branch", select "main" and keep "/ (root)" selected.
+  4. Click "Save".
+  5. Wait ~1 minute, then your game will be live at:
+     https://YOUR-USERNAME.github.io/soelberg-jeopardy/
+
+STEP 4 — Share the URL with your family! 🇺🇸
+
+===================================================================
+HOW TO UPDATE YOUR QUESTIONS LATER
+===================================================================
+  1. Edit this file (change the CATEGORIES section near the top of
+     the <script> tag).
+  2. Re-upload to GitHub (or use git push).
+  3. Your live site updates in ~30 seconds.
+===================================================================
+-->
